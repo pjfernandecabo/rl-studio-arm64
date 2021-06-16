@@ -1,18 +1,26 @@
 import cv2
 import numpy as np
 
+from cprint import cprint
+
 
 class ImageF1:
 
     font = cv2.FONT_HERSHEY_COMPLEX
 
     def __init__(self):
+
+        cprint.warn(f"\n ------- Enter ImageF1 ---------------\n")
+
         self.height = 3  # Image height [pixels]
         self.width = 3  # Image width [pixels]
         self.timeStamp = 0  # Time stamp [s] */
         self.format = ""  # Image format string (RGB8, BGR,...)
         self.data = np.zeros((self.height, self.width, 3), np.uint8)  # The image data itself
         self.data.shape = self.height, self.width, 3
+
+        cprint.ok(f"\n -------- Out ImageF1 (__init__) -------------\n")
+
 
     def __str__(self):
         return f"Image:" \
@@ -21,7 +29,7 @@ class ImageF1:
 
     @staticmethod
     def image_msg_to_image(img, cv_image):
-
+        print(f"\n ImageF1.image_msg_to_image()\n")
         image.width = img.width
         image.height = img.height
         image.format = "RGB8"
@@ -33,6 +41,7 @@ class ImageF1:
 
     @staticmethod
     def show_telemetry(img, points, action, reward):
+        print(f"\n ImageF1.show_telemetry()\n")
         count = 0
         for idx, point in enumerate(points):
             cv2.line(img, (320, x_row[idx]), (320, x_row[idx]), (255, 255, 0), thickness=5)

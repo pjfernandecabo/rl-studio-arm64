@@ -4,6 +4,9 @@ import rospy
 import sys
 import os
 import signal
+from cprint import cprint
+
+
 from pathlib import Path
 
 from gazebo_msgs.msg import ModelState
@@ -23,7 +26,9 @@ class GazeboEnv(gym.Env):
     metadata = {'render.models': ['human']}
 
     def __init__(self, launchfile):
-        print(launchfile)
+
+        cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
+        cprint.info(f"launchfile: {launchfile}")
         self.last_clock_msg = Clock()
         self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
         self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
@@ -34,6 +39,7 @@ class GazeboEnv(gym.Env):
         print(f"GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
 
         ros_path = os.path.dirname(subprocess.check_output(["which", "roscore"]))
+        cprint.warn(f"\n ros_path: {ros_path}")
 
         # NOTE: It doesn't make sense to launch a roscore because it will be done when spawing Gazebo, which also need
         #   to be the first node in order to initialize the clock.
@@ -47,19 +53,22 @@ class GazeboEnv(gym.Env):
         else:
             # TODO: Global env for 'f1'. It must be passed in constructor.
             fullpath = str(Path(Path(__file__).resolve().parents[1] / "CustomRobots" / "f1" / "launch" / launchfile))
-            print(f"-----> {fullpath}")
+            print(f"\n fullpath: {fullpath}")
         if not os.path.exists(fullpath):
             raise IOError(f"File {fullpath} does not exist")
 
+        # launching GAZEBO
         self._roslaunch = subprocess.Popen([
             sys.executable, os.path.join(ros_path, b"roslaunch"), "-p", self.port, fullpath
         ])
-        print("Gazebo launched!")
+        print("\n Gazebo launched!")
 
         self.gzclient_pid = 0
 
         # Launch the simulation with the given launchfile name
         rospy.init_node('gym', anonymous=True)
+
+        cprint.ok(f"\n -------- Out GazeboEnv (__init__) ----------------\n")
 
         ################################################################################################################
         # r = rospy.Rate(1)
@@ -104,11 +113,13 @@ class GazeboEnv(gym.Env):
         object_coordinates = self.model_coordinates("f1_renault", "")
         x_position = round(object_coordinates.pose.position.x, 2)
         y_position = round(object_coordinates.pose.position.y, 2)
+        print(f"\n GazeboEnv.get_position()\n")
 
         return x_position, y_position
 
     def _gazebo_reset(self):
         # Resets the state of the environment and returns an initial observation.
+        print(f"\n GazeboEnv._gazebo_reset()\n")
         rospy.wait_for_service('/gazebo/reset_simulation')
         try:
             # reset_proxy.call()
@@ -118,6 +129,7 @@ class GazeboEnv(gym.Env):
             print(f"/gazebo/reset_simulation service call failed: {e}")
 
     def _gazebo_pause(self):
+        print(f"\n GazeboEnv._gazebo_pause()\n")
         rospy.wait_for_service('/gazebo/pause_physics')
         try:
             # resp_pause = pause.call()
@@ -126,6 +138,7 @@ class GazeboEnv(gym.Env):
             print(f"/gazebo/pause_physics service call failed: {e}")
 
     def _gazebo_unpause(self):
+        print(f"\n GazeboEnv._gazebo_unpause()\n")
         rospy.wait_for_service('/gazebo/unpause_physics')
         try:
             self.unpause()
@@ -136,6 +149,7 @@ class GazeboEnv(gym.Env):
         """
         (pos_number, pose_x, pose_y, pose_z, or_x, or_y, or_z, or_z)
         """
+        print(f"\n GazeboEnv._gazebo_set_new_pose()\n")
         pos = random.choice(list(enumerate(self.circuit["gaz_pos"])))[0]
         self.position = pos
 
@@ -160,7 +174,7 @@ class GazeboEnv(gym.Env):
         return pos_number
 
     def _render(self, mode="human", close=False):
-
+        print(f"\n GazeboEnv._render()\n")
         if close:
             tmp = os.popen("ps -Af").read()
             proccount = tmp.count('gzclient')
@@ -180,7 +194,7 @@ class GazeboEnv(gym.Env):
 
     @staticmethod
     def _close():
-
+        print(f"\n GazeboEnv._close()\n")
         # Kill gzclient, gzserver and roscore
         tmp = os.popen("ps -Af").read()
         gzclient_count = tmp.count('gzclient')

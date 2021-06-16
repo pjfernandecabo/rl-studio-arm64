@@ -2,6 +2,20 @@ import pickle
 import datetime
 from agents.f1 import settings
 
+import os
+import yaml
+
+
+def read_config(yaml_file):
+    '''
+    read and parse YAML file with config
+    '''
+    with open(yaml_file, 'r') as stream:
+        config_yaml = yaml.safe_load(stream)
+
+	algorithm = all_cfg['Algorithm']
+    return config_yaml, all_cfg[algorithm]    
+
 
 
 def load_model(qlearn, file_name):
@@ -28,6 +42,7 @@ def save_model(qlearn, current_time, states, states_counter, states_rewards):
     # (S x A), where s are all states, a are all the possible actions. After the environment is solved, just save this
     # matrix as a csv file. I have a quick implementation of this on my GitHub under Reinforcement Learning.
 
+    os.makedirs("./logs/qlearn_models", exist_ok=True)
     # Q TABLE
     base_file_name = "_act_set_{}_epsilon_{}".format(settings.actions_set, round(qlearn.epsilon, 2))
     file_dump = open("./logs/qlearn_models/1_" + current_time + base_file_name + '_QTABLE.pkl', 'wb')
