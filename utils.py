@@ -14,8 +14,13 @@ def read_config(yaml_file):
     with open(yaml_file, 'r') as stream:
         config_yaml = yaml.safe_load(stream)
     
-    algorithm = config_yaml['Algorithm']
-    return config_yaml, config_yaml[algorithm]    
+    #algorithm = config_yaml['Algorithm']
+    #model = config_yaml['Model']
+    #actions = config_yaml['envs_params'][model]['actions'] 
+    #gazebo_position = config_yaml['envs_params'][model]['gaz_pos']
+
+    #return config_yaml, config_yaml['Algorithm'], config_yaml[algorithm], config_yaml['Model'], config_yaml[actions], config_yaml[gazebo_position]   
+    return config_yaml
 
 
 
@@ -38,27 +43,32 @@ def load_model(qlearn, file_name):
     print(f"    - Start:      {datetime.datetime.now()}")
 
 
-def save_model(qlearn, current_time, states, states_counter, states_rewards):
+def save_model(outdir, qlearn, current_time, states, states_counter, states_rewards):
     # Tabular RL: Tabular Q-learning basically stores the policy (Q-values) of  the agent into a matrix of shape
     # (S x A), where s are all states, a are all the possible actions. After the environment is solved, just save this
     # matrix as a csv file. I have a quick implementation of this on my GitHub under Reinforcement Learning.
 
-    os.makedirs("./logs/qlearn_models", exist_ok=True)
+    outdir_models = f"{outdir}_models"
+    os.makedirs(f"{outdir_models}", exist_ok=True)
+
     # Q TABLE
-    base_file_name = "_act_set_{}_epsilon_{}".format(settings.actions_set, round(qlearn.epsilon, 2))
-    file_dump = open("./logs/qlearn_models/1_" + current_time + base_file_name + '_QTABLE.pkl', 'wb')
+    base_file_name = "_actions_set_{}_epsilon_{}".format(settings.actions_set, round(qlearn.epsilon, 2))
+    file_dump = open(f"{outdir_models}/1_" + current_time + base_file_name + '_QTABLE.pkl', 'wb')
     pickle.dump(qlearn.q, file_dump)
+    
     # STATES COUNTER
     states_counter_file_name = base_file_name + "_STATES_COUNTER.pkl"
-    file_dump = open("./logs/qlearn_models/2_" + current_time + states_counter_file_name, 'wb')
+    file_dump = open(f"{outdir_models}/2_" + current_time + states_counter_file_name, 'wb')
     pickle.dump(states_counter, file_dump)
+    
     # STATES CUMULATED REWARD
     states_cum_reward_file_name = base_file_name + "_STATES_CUM_REWARD.pkl"
-    file_dump = open("./logs/qlearn_models/3_" + current_time + states_cum_reward_file_name, 'wb')
+    file_dump = open(f"{outdir_models}/3_" + current_time + states_cum_reward_file_name, 'wb')
     pickle.dump(states_rewards, file_dump)
+    
     # STATES
     steps = base_file_name + "_STATES_STEPS.pkl"
-    file_dump = open("./logs/qlearn_models/4_" + current_time + steps, 'wb')
+    file_dump = open(f"{outdir_models}/4_" + current_time + steps, 'wb')
     pickle.dump(states, file_dump)
 
 
