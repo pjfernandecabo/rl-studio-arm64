@@ -18,15 +18,15 @@ class F1QlearnCameraEnv(F1Env):
 
     def __init__(self, **config):
 
-        cprint.warn(f"\n --------- Enter in F1QlearnCameraEnv ---------------\n")
+        cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
 
         F1Env.__init__(self, **config)
-        print(f"\n [F1QlearnCameraEnv] config: {config}")
+        print(f"\n [F1QlearnCameraEnv] -> config: {config}")
         self.image = ImageF1()
         self.actions = config.get("actions")
         self.action_space = spaces.Discrete(len(self.actions))  # actions  # spaces.Discrete(3)  # F,L,R
 
-        cprint.ok(f"\n ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
+        cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
 
     def render(self, mode='human'):
         pass
@@ -167,7 +167,8 @@ class F1QlearnCameraEnv(F1Env):
         print(f"\n F1QlearnCameraEnv.reset()\n")
         # === POSE ===
         if self.alternate_pose:
-            self.set_new_pose()
+            self._gazebo_set_new_pose
+            #self.set_new_pose()
         else:
             self._gazebo_reset()
 

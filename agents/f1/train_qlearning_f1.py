@@ -18,9 +18,9 @@ from algorithms.qlearn import QLearn
 
 def train_qlearning_f1(config):
 
-    cprint.warn(f"\n {config['Title']}")
-    cprint.ok(f"\n {config['Description']}")
-    cprint.info(f"\n- Start hour: {datetime.datetime.now()}")
+    cprint.warn(f"\n [train_qlearning_f1] -> {config['Title']}")
+    cprint.ok(f"\n [train_qlearning_f1] -> {config['Description']}")
+    cprint.info(f"\n- [train_qlearning_f1] -> Start hour: {datetime.datetime.now()}")
 
 
     #--------------------- Init QLearning Vars
@@ -29,6 +29,7 @@ def train_qlearning_f1(config):
 
     # ------------------ Init env
     environment = {}
+    environment['agent'] = config['Agent']
     environment['env'] = config['envs_params'][model]['env']
     environment['training_type'] = config['envs_params'][model]['training_type']
     environment['circuit_name'] = config['envs_params'][model]['circuit_name']
@@ -40,11 +41,11 @@ def train_qlearning_f1(config):
     environment['estimated_steps'] = config['envs_params'][model]['estimated_steps']
     environment['sensor'] = config['envs_params'][model]['sensor']
 
-    print(f"\n environment: {environment}")
+    print(f"\n [train_qlearning_f1] -> environment: {environment}")
 
     env = gym.make(environment["env"], **environment)
 
-    cprint.info(f"\n ---- come back train_qlearn_f1 ------------")
+    cprint.info(f"\n ---- [train_qlearning_f1] -> come back train_qlearn_f1 ------------")
 
     # ---------------- Init hyperparmas & Algorithm
     alpha = config['Hyperparams']['alpha']
@@ -82,6 +83,9 @@ def train_qlearning_f1(config):
     start_time_format = start_time.strftime("%Y%m%d_%H%M")
     previous = datetime.datetime.now()
     checkpoints = []  # "ID" - x, y - time 
+    print(f"\n [train_qlearning_f1] -> telemetry_start_time: {telemetry_start_time}, "
+        f"start_time: {start_time}, start_time_format: {start_time_format}, previous: {previous}")
+
 
     if config['load_model']:
         # TODO: Folder to models. Maybe from environment variable?
@@ -91,7 +95,7 @@ def train_qlearning_f1(config):
     else:
         highest_reward = 0
 
-    cprint.warn(f"\n {config['Lets_go']}")
+    cprint.warn(f"\n[train_qlearning_f1] -> {config['Lets_go']}")
 
 
     ############################## START TRAINING #################################################################
@@ -124,7 +128,7 @@ def train_qlearning_f1(config):
 
             # Execute the action and get feedback
             observation, reward, done, info = env.step(action)
-            print(f"\n In each step ==> observation: {observation}, reward: {reward}"
+            print(f"\n ---- > In each step ==> observation: {observation}, reward: {reward}"
                   f", done: {done}, info: {info} in episode {episode}")
             
             cumulated_reward += reward
@@ -162,65 +166,82 @@ def train_qlearning_f1(config):
                 last_time_steps = np.append(last_time_steps, [int(step + 1)])
                 stats[int(episode)] = step
                 states_reward[int(episode)] = cumulated_reward
-                print(f"EP: {episode + 1} - epsilon: {round(qlearn.epsilon, 2)} - Reward: {cumulated_reward}"
+                print(f"Enter IF DONE: ---> EP: {episode + 1} - epsilon: {round(qlearn.epsilon, 2)} - Reward: {cumulated_reward}"
                       f"- Time: {start_time_format} - Steps: {step}")
                 break
 
+            # Finish lap every "estimate_step_per_lap"        
             if step > estimate_step_per_lap and not lap_completed:
                 lap_completed = True
                 if config['plotter_graphic']:
                     plotter.plot_steps_vs_epoch(stats, save=True)
                 utils.save_model(outdir, qlearn, start_time_format, stats, states_counter, states_reward)
                 print(f"\n\n====> LAP COMPLETED in: {datetime.datetime.now() - start_time} - episode: {episode}"
-                      f" - Cum. Reward: {cumulated_reward} <====\n\n")
+                      f" - Cum. Reward: {cumulated_reward} - step: {step}<====\n\n")
 
-            if counter > 100: #oroginal 1000
+            # every 100 steps
+            if counter > config['save_every_step']: #oroginal 1000
                 if config['plotter_graphic']:
                     plotter.plot_steps_vs_epoch(stats, save=True)
                 epsilon *= epsilon_discount
                 utils.save_model(outdir, qlearn, start_time_format, episode, states_counter, states_reward)
-                print(f"\t- epsilon: {round(qlearn.epsilon, 2)}\n\t- cum reward: {cumulated_reward}\n\t- dict_size: "
-                      f"{len(qlearn.q)}\n\t- time: {datetime.datetime.now()-start_time}\n\t- steps: {step}\n")
+                print(f"\tSAVING MODEL in counter > 100 --------> \n")
+                print(f"    - N epoch:     {episode}")
+                print(f"    - Model size:  {len(qlearn.q)}")
+                print(f"    - Action set:  {settings.actions_set}")
+                print(f"    - Epsilon:     {round(qlearn.epsilon, 2)}")
+                print(f"    - Cum. reward: {cumulated_reward}")      
+                print(f"    - steps: {step}")      
+                print(f"    - time: {datetime.datetime.now()-start_time}\n\t")      
                 counter = 0
 
-            if datetime.datetime.now() - datetime.timedelta(hours=2) > start_time:
+            #  Saving model in Training TIME (2 h)
+            if datetime.datetime.now() - datetime.timedelta(hours=config['train_hours']) > start_time:
                 print(config['eop'])
                 utils.save_model(outdir, qlearn, start_time_format, stats, states_counter, states_reward)
+                print(f"\tSAVING MODEL in time {datetime.datetime.now() - datetime.timedelta(hours=train_hours)}\n")
                 print(f"    - N epoch:     {episode}")
                 print(f"    - Model size:  {len(qlearn.q)}")
                 print(f"    - Action set:  {settings.actions_set}")
                 print(f"    - Epsilon:     {round(qlearn.epsilon, 2)}")
                 print(f"    - Cum. reward: {cumulated_reward}")
-
+                print(f"    - steps: {step}")      
+                print(f"    - time: {datetime.datetime.now()-start_time}\n\t")    
                 env.close()
                 exit(0)
 
-        if episode % 1 == 0 and config['plotter_graphic']:
+        # We are in EPISODES
+        if episode % config['save_every_episode'] == 0 and config['plotter_graphic']:
             # plotter.plot(env)
             plotter.plot_steps_vs_epoch(stats)
             # plotter.full_plot(env, stats, 2)  # optional parameter = mode (0, 1, 2)
 
-        if episode % 250 == 0 and config['save_model'] and episode > 1:  #OJO: episode % 250 originally
-            print(f"\nSaving model . . .\n")
+        if episode % config['save_episodes'] == 0 and config['save_model'] and episode > 1:  #OJO: episode % 250 originally
+            print(f"\nSaving model every {config['save_episodes']} episodes . . .\n")
             utils.save_model(outdir, qlearn, start_time_format, stats, states_counter, states_reward)
+            print(f"\tSAVING MODEL in time {datetime.datetime.now() - datetime.timedelta(hours=train_hours)}\n")
+            print(f"    - N epoch:     {episode}")
+            print(f"    - Model size:  {len(qlearn.q)}")
+            print(f"    - Action set:  {settings.actions_set}")
+            print(f"    - Epsilon:     {round(qlearn.epsilon, 2)}")
+            print(f"    - Cum. reward: {cumulated_reward}")
+            print(f"    - steps: {step}")      
+            print(f"    - time: {datetime.datetime.now()-start_time}\n\t") 
 
         m, s = divmod(int(time.time() - telemetry_start_time), 60)
         h, m = divmod(m, 60)
 
-    print("Total EP: {} - epsilon: {} - ep. discount: {} - Highest Reward: {}".format(
-            total_episodes,
-            initial_epsilon,
-            epsilon_discount,
-            highest_reward
-        )
-    )
-
-    l = last_time_steps.tolist()
-    l.sort()
+    print(f"\n ========= FINISH TRAINING at episode {episode} in time: {datetime.datetime.now()-start_time} ========\n\t")
+    print(f"Total EP: {total_episodes} - epsilon: {initial_epsilon} "
+            f"- ep. discount: {epsilon_discount} - Highest Reward: {highest_reward}")
 
     # print("Parameters: a="+str)
+    print(f" ----- OVERALL STATS")
     print("Overall score: {:0.2f}".format(last_time_steps.mean()))
-    print("Best 100 score: {:0.2f}".format(reduce(lambda x, y: x + y, l[-100:]) / len(l[-100:])))
+    
+    l = last_time_steps.tolist()
+    l.sort()
+    print("Best 100 scores: {:0.2f}".format(reduce(lambda x, y: x + y, l[-100:]) / len(l[-100:])))
 
     #plotter.plot_steps_vs_epoch(stats, save=True)
 
