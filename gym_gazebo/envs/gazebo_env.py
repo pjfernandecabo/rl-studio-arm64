@@ -25,21 +25,24 @@ class GazeboEnv(gym.Env):
     
     metadata = {'render.models': ['human']}
 
-    def __init__(self, launchfile):
+    #def __init__(self, launchfile):
+    def __init__(self, **config):
 
         cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
-        cprint.info(f"launchfile: {launchfile}")
+        self.launchfile = config.get("launch")
+        cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
+        self.agent = config.get("agent")
         self.last_clock_msg = Clock()
         self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
         self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
         # self.ros_master_uri = os.environ["ROS_MASTER_URI"];
         # self.port = os.environ.get("ROS_PORT_SIM", "11311")
 
-        print(f"\nROS_MASTER_URI = http://localhost:{self.port}\n")
-        print(f"GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
+        print(f"\n[GazeboEnv] -> ROS_MASTER_URI = http://localhost:{self.port}\n")
+        print(f"\n[GazeboEnv] -> GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
 
         ros_path = os.path.dirname(subprocess.check_output(["which", "roscore"]))
-        cprint.warn(f"\n ros_path: {ros_path}")
+        cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
 
         # NOTE: It doesn't make sense to launch a roscore because it will be done when spawing Gazebo, which also need
         #   to be the first node in order to initialize the clock.
@@ -48,27 +51,27 @@ class GazeboEnv(gym.Env):
         # time.sleep(1)
         # print ("Roscore launched!")
 
-        if launchfile.startswith("/"):
-            fullpath = launchfile
+        if self.launchfile.startswith("/"):
+            fullpath = self.launchfile
         else:
             # TODO: Global env for 'f1'. It must be passed in constructor.
-            fullpath = str(Path(Path(__file__).resolve().parents[1] / "CustomRobots" / "f1" / "launch" / launchfile))
-            print(f"\n fullpath: {fullpath}")
+            fullpath = str(Path(Path(__file__).resolve().parents[1] / "CustomRobots" / self.agent / "launch" / self.launchfile))
+            print(f"\n[GazeboEnv] -> fullpath: {fullpath}")
         if not os.path.exists(fullpath):
-            raise IOError(f"File {fullpath} does not exist")
+            raise IOError(f"[GazeboEnv] -> File {fullpath} does not exist")
 
         # launching GAZEBO
         self._roslaunch = subprocess.Popen([
             sys.executable, os.path.join(ros_path, b"roslaunch"), "-p", self.port, fullpath
         ])
-        print("\n Gazebo launched!")
+        print("\n[GazeboEnv] -> Gazebo launched!")
 
         self.gzclient_pid = 0
 
         # Launch the simulation with the given launchfile name
         rospy.init_node('gym', anonymous=True)
 
-        cprint.ok(f"\n -------- Out GazeboEnv (__init__) ----------------\n")
+        cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
 
         ################################################################################################################
         # r = rospy.Rate(1)

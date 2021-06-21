@@ -37,7 +37,7 @@ if __name__ == '__main__':
     config = utils.read_config(args.config_file)
 
     execute_algor = f"{config['Method']}_{config['Algorithm']}_{config['Agent']}"
-    print(f"execute: {execute_algor}")
+    print(f"\n [RLStudio] -> execute ALGORITHM : {execute_algor}")
 
     # ------------------- CREATE DIRS
     os.makedirs("logs", exist_ok=True)
