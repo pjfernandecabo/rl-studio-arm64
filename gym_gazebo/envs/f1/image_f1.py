@@ -10,7 +10,7 @@ class ImageF1:
 
     def __init__(self):
 
-        cprint.warn(f"\n [ImageF1] -> ------- Enter ImageF1 ---------------\n")
+        #cprint.warn(f"\n [ImageF1] -> ------- Enter ImageF1 ---------------\n")
 
         self.height = 3  # Image height [pixels]
         self.width = 3  # Image width [pixels]
@@ -19,7 +19,7 @@ class ImageF1:
         self.data = np.zeros((self.height, self.width, 3), np.uint8)  # The image data itself
         self.data.shape = self.height, self.width, 3
 
-        cprint.ok(f"\n  [ImageF1] -> -------- Out ImageF1 (__init__) -------------\n")
+        #cprint.ok(f"\n  [ImageF1] -> -------- Out ImageF1 (__init__) -------------\n")
 
 
     def __str__(self):

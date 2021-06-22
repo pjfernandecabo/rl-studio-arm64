@@ -18,15 +18,15 @@ class F1QlearnCameraEnv(F1Env):
 
     def __init__(self, **config):
 
-        cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
+        #cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
 
         F1Env.__init__(self, **config)
-        print(f"\n [F1QlearnCameraEnv] -> config: {config}")
+        #print(f"\n [F1QlearnCameraEnv] -> config: {config}")
         self.image = ImageF1()
         self.actions = config.get("actions")
         self.action_space = spaces.Discrete(len(self.actions))  # actions  # spaces.Discrete(3)  # F,L,R
 
-        cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
+        #cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
 
     def render(self, mode='human'):
         pass
@@ -37,7 +37,7 @@ class F1QlearnCameraEnv(F1Env):
         return all(x == items[0] for x in items)
 
     def image_msg_to_image(self, img, cv_image):
-        print(f"\n F1QlearnCameraEnv.image_msg_to_image()\n")
+        #print(f"\n F1QlearnCameraEnv.image_msg_to_image()\n")
 
         self.image.width = img.width
         self.image.height = img.height
@@ -49,7 +49,7 @@ class F1QlearnCameraEnv(F1Env):
 
     @staticmethod
     def get_center(lines):
-        print(f"\n F1QlearnCameraEnv.get_center()\n")
+        #print(f"\n F1QlearnCameraEnv.get_center()\n")
         try:
             point = np.divide(np.max(np.nonzero(lines)) - np.min(np.nonzero(lines)), 2)
             point = np.min(np.nonzero(lines)) + point
@@ -73,7 +73,7 @@ class F1QlearnCameraEnv(F1Env):
         :parameters: input image 640x480
         :return: x, y, z: 3 coordinates
         """
-        print(f"\n F1QlearnCameraEnv.processed_image()\n")
+        #print(f"\n F1QlearnCameraEnv.processed_image()\n")
 
         img_sliced = img[240:]
         img_proc = cv2.cvtColor(img_sliced, cv2.COLOR_BGR2HSV)
@@ -100,7 +100,7 @@ class F1QlearnCameraEnv(F1Env):
 
     @staticmethod
     def calculate_observation(state):
-        print(f"\n F1QlearnCameraEnv.calculate_observation()\n")
+        #print(f"\n F1QlearnCameraEnv.calculate_observation()\n")
         normalize = 40
 
         final_state = []
@@ -110,12 +110,12 @@ class F1QlearnCameraEnv(F1Env):
         return final_state
 
     def _seed(self, seed=None):
-        print(f"\n F1QlearnCameraEnv._seed()\n")
+        #print(f"\n F1QlearnCameraEnv._seed()\n")
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def step(self, action):
-        print(f"\n F1QlearnCameraEnv.step()\n")
+        #print(f"\n F1QlearnCameraEnv.step()\n")
         self._gazebo_unpause()
 
         vel_cmd = Twist()

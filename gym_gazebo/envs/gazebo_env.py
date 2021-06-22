@@ -28,9 +28,9 @@ class GazeboEnv(gym.Env):
     #def __init__(self, launchfile):
     def __init__(self, **config):
 
-        cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
+        #cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
         self.launchfile = config.get("launch")
-        cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
+        #cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
         self.agent = config.get("agent")
         self.last_clock_msg = Clock()
         self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
@@ -38,11 +38,11 @@ class GazeboEnv(gym.Env):
         # self.ros_master_uri = os.environ["ROS_MASTER_URI"];
         # self.port = os.environ.get("ROS_PORT_SIM", "11311")
 
-        print(f"\n[GazeboEnv] -> ROS_MASTER_URI = http://localhost:{self.port}\n")
-        print(f"\n[GazeboEnv] -> GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
+        #print(f"\n[GazeboEnv] -> ROS_MASTER_URI = http://localhost:{self.port}\n")
+        #print(f"\n[GazeboEnv] -> GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
 
         ros_path = os.path.dirname(subprocess.check_output(["which", "roscore"]))
-        cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
+        #cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
 
         # NOTE: It doesn't make sense to launch a roscore because it will be done when spawing Gazebo, which also need
         #   to be the first node in order to initialize the clock.
@@ -56,7 +56,7 @@ class GazeboEnv(gym.Env):
         else:
             # TODO: Global env for 'f1'. It must be passed in constructor.
             fullpath = str(Path(Path(__file__).resolve().parents[1] / "CustomRobots" / self.agent / "launch" / self.launchfile))
-            print(f"\n[GazeboEnv] -> fullpath: {fullpath}")
+            #print(f"\n[GazeboEnv] -> fullpath: {fullpath}")
         if not os.path.exists(fullpath):
             raise IOError(f"[GazeboEnv] -> File {fullpath} does not exist")
 
@@ -71,7 +71,7 @@ class GazeboEnv(gym.Env):
         # Launch the simulation with the given launchfile name
         rospy.init_node('gym', anonymous=True)
 
-        cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
+        #cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
 
         ################################################################################################################
         # r = rospy.Rate(1)
@@ -132,7 +132,7 @@ class GazeboEnv(gym.Env):
             print(f"/gazebo/reset_simulation service call failed: {e}")
 
     def _gazebo_pause(self):
-        print(f"\n GazeboEnv._gazebo_pause()\n")
+        #print(f"\n GazeboEnv._gazebo_pause()\n")
         rospy.wait_for_service('/gazebo/pause_physics')
         try:
             # resp_pause = pause.call()
@@ -141,7 +141,7 @@ class GazeboEnv(gym.Env):
             print(f"/gazebo/pause_physics service call failed: {e}")
 
     def _gazebo_unpause(self):
-        print(f"\n GazeboEnv._gazebo_unpause()\n")
+        #print(f"\n GazeboEnv._gazebo_unpause()\n")
         rospy.wait_for_service('/gazebo/unpause_physics')
         try:
             self.unpause()

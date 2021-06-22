@@ -42,6 +42,7 @@ if __name__ == '__main__':
     # ------------------- CREATE DIRS
     os.makedirs("logs", exist_ok=True)
     os.makedirs("stats", exist_ok=True)
+    os.makedirs("images", exist_ok=True)
     #os.makedirs("logs", exist_ok=True)
     
 

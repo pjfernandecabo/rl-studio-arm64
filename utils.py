@@ -5,7 +5,12 @@ import settings
 
 import os
 import yaml
+import csv
+import time
 
+from matplotlib import pyplot as plt
+
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 def read_config(yaml_file):
     '''
@@ -21,6 +26,49 @@ def read_config(yaml_file):
 
     #return config_yaml, config_yaml['Algorithm'], config_yaml[algorithm], config_yaml['Model'], config_yaml[actions], config_yaml[gazebo_position]   
     return config_yaml
+
+
+def save_stats_episodes(outdir, aggr_ep_rewards, config, episode):
+    '''
+            We save info of EPISODES (each 1 or n, which is defined in YMAL)
+            in a dataframe to export or manage
+    '''
+
+
+    outdir_episode = f"{outdir}_{config['Model']}_STATS"
+    os.makedirs(f"{outdir_episode}", exist_ok=True)
+
+    file = open(f"{outdir_episode}/{config['Method']}_{config['Algorithm']}_{config['Agent']}_{config['Model']}_EPISODE_{episode}_{time.strftime('%Y%m%d-%H%M%S')}.csv", "a")
+    writer = csv.writer(file)
+
+    for key, value in aggr_ep_rewards.items():
+        writer.writerow([key, value])
+
+    file.close()    
+
+
+
+def draw_rewards(outdir, aggr_ep_rewards, config, episode):
+    '''
+        Plot Rewards
+    '''
+    outdir_episode = f"{outdir}_{config['Model']}_PLOTS"
+    os.makedirs(f"{outdir_episode}", exist_ok=True)
+
+
+    plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['avg'], label="average rewards")
+    plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['max'], label="max rewards")
+    plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['min'], label="min rewards")
+    plt.title(f"{config['Method']}_{config['Algorithm']}_{config['Agent']}_{config['Model']} with Learning Rate {config['Hyperparams']['alpha']} and Discount Rate {config['Hyperparams']['gamma']}")
+
+    plt.suptitle([config['Hyperparams']['alpha'], config['Hyperparams']['alpha']])
+    plt.legend(loc=0) #loc=0 best place
+    plt.grid(True)
+
+    #os.makedirs("Images", exist_ok = True)            
+    plt.savefig(f"Images/{config['Method']}_{config['Algorithm']}_{config['Agent']}_{config['Model']}_{config['Hyperparams']['alpha']}_{config['Hyperparams']['gamma']}-{episode}-({aggr_ep_rewards['max']})-{time.strftime('%Y%m%d-%H%M%S')}.jpg", bbox_inches='tight')
+    plt.clf()
+
 
 
 
