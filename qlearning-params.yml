@@ -1,7 +1,12 @@
 
+# Next params are in setting.py:
+# - Actions 
+# - Gazebo
+# - Camera
+
 Dirspace: /home/parallels/rl-studio-arm64
 
-# Options: qlearning, SARS, expectedSARSA, DQN, AC
+# Options: qlearning, SARSA, expectedSARSA, DQN, AC
 Algorithm: qlearning
 
 # Options: f1
@@ -38,28 +43,42 @@ envs_params:
     estimated_steps: 100 #original 4000
     sensor: camera
 
+# rewards
+Rewards:
+  from_0_02: 10
+  from_02_04: 2
+  from_others: 1
+  from_done: -100 
+
+highest_reward: 0
+
+# ROS and GAZEBO
+ROS_MASTER_URI: '11311'
+GAZEBO_MASTER_URI: '11345'
+
 
 # Flags
 debug_level: 0
-telemetry: False
-telemetry_mask: False
+#telemetry: False
+#telemetry_mask: False
 plotter_graphic: False
 
 save_every_episode: 1
 save_episodes: 1
 save_every_step: 100
-highest_reward: 0
 
+lap_completed: False
 my_board: True
 save_positions: False
 save_model: True
+
 load_model: False
-lap_completed: False
+file_load_pickle: 1_20210622_1512_actions_set_simple_epsilon_0.99_QTABLE.pkl
 
 # === MODELS OUTPUT DIR ===
 #output_dir: "./logs/qlearn_models/qlearn_camera_solved/"
 
-max_distance: 0.5
+#max_distance: 0.5
 
 #available_actions_simple: 
 #  0: (3,0)  

@@ -5,8 +5,8 @@
 
 # === BASIC CONFIG ===
 #debug_level = 0
-#telemetry = False
-#telemetry_mask = False
+telemetry = True
+telemetry_mask = False
 #plotter_graphic = False
 #my_board = True
 #save_positions = False
@@ -17,7 +17,7 @@
 #output_dir = "./logs/qlearn_models/qlearn_camera_solved/"
 
 
-#max_distance = 0.5
+max_distance = 0.5
 
 # === CAMERA ===
 # Images size

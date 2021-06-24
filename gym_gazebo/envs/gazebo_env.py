@@ -5,7 +5,8 @@ import sys
 import os
 import signal
 from cprint import cprint
-
+from icecream import ic
+from datetime import datetime, timedelta
 
 from pathlib import Path
 
@@ -16,6 +17,13 @@ import subprocess
 from std_srvs.srv import Empty
 import random
 from rosgraph_msgs.msg import Clock
+
+
+
+ic.enable()
+#ic.disable()
+#ic.configureOutput(prefix='Debug | ')
+ic.configureOutput(prefix=f'{datetime.now()} | ')
 
 
 class GazeboEnv(gym.Env):
@@ -33,8 +41,10 @@ class GazeboEnv(gym.Env):
         #cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
         self.agent = config.get("agent")
         self.last_clock_msg = Clock()
-        self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
-        self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
+        #self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
+        #self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
+        self.port = config['ROS_MASTER_URI']  # str(random_number) #os.environ["ROS_PORT_SIM"]
+        self.port_gazebo = config['GAZEBO_MASTER_URI']        
         # self.ros_master_uri = os.environ["ROS_MASTER_URI"];
         # self.port = os.environ.get("ROS_PORT_SIM", "11311")
 
@@ -60,11 +70,14 @@ class GazeboEnv(gym.Env):
         if not os.path.exists(fullpath):
             raise IOError(f"[GazeboEnv] -> File {fullpath} does not exist")
 
+        ic("GAZEBO LAUNCHING")
         # launching GAZEBO
         self._roslaunch = subprocess.Popen([
             sys.executable, os.path.join(ros_path, b"roslaunch"), "-p", self.port, fullpath
         ])
-        print("\n[GazeboEnv] -> Gazebo launched!")
+
+        #print("\n[GazeboEnv] -> Gazebo launched!")
+        ic("GAZEBO LAUNCHED")
 
         self.gzclient_pid = 0
 
@@ -122,7 +135,7 @@ class GazeboEnv(gym.Env):
 
     def _gazebo_reset(self):
         # Resets the state of the environment and returns an initial observation.
-        print(f"\n GazeboEnv._gazebo_reset()\n")
+        #print(f"\n GazeboEnv._gazebo_reset()\n")
         rospy.wait_for_service('/gazebo/reset_simulation')
         try:
             # reset_proxy.call()
