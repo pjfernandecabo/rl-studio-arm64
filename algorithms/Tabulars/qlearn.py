@@ -6,12 +6,18 @@ import random
 
 
 class QLearn:
-    def __init__(self, actions, epsilon, alpha, gamma):
-        self.q = {}
-        self.epsilon = epsilon  # exploration constant
+    def __init__(self, actions, alpha, gamma, epsilon, q_table=None):
+
+        if q_table:
+            self.q = q_table
+        else:
+            self.q = {}
+
+        self.actions = actions
         self.alpha = alpha      # discount constant
         self.gamma = gamma      # discount factor
-        self.actions = actions
+        self.epsilon = epsilon  # exploration constant
+
 
     def getQValues(self, state, action):
         return self.q.get((state, action), 0.0)

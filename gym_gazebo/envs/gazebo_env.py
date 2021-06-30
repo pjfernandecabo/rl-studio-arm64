@@ -5,7 +5,8 @@ import sys
 import os
 import signal
 from cprint import cprint
-
+from icecream import ic
+from datetime import datetime, timedelta
 
 from pathlib import Path
 
@@ -18,6 +19,13 @@ import random
 from rosgraph_msgs.msg import Clock
 
 
+
+ic.enable()
+#ic.disable()
+#ic.configureOutput(prefix='Debug | ')
+ic.configureOutput(prefix=f'{datetime.now()} | ')
+
+
 class GazeboEnv(gym.Env):
     """
     Superclass for all Gazebo environments.
@@ -28,13 +36,15 @@ class GazeboEnv(gym.Env):
     #def __init__(self, launchfile):
     def __init__(self, **config):
 
-        #cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
+        cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
         self.launchfile = config.get("launch")
         #cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
         self.agent = config.get("agent")
         self.last_clock_msg = Clock()
-        self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
-        self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
+        #self.port = "11311"  # str(random_number) #os.environ["ROS_PORT_SIM"]
+        #self.port_gazebo = "11345"  # str(random_number+1) #os.environ["ROS_PORT_SIM"]
+        self.port = config['ROS_MASTER_URI']  # str(random_number) #os.environ["ROS_PORT_SIM"]
+        self.port_gazebo = config['GAZEBO_MASTER_URI']        
         # self.ros_master_uri = os.environ["ROS_MASTER_URI"];
         # self.port = os.environ.get("ROS_PORT_SIM", "11311")
 
@@ -42,7 +52,7 @@ class GazeboEnv(gym.Env):
         #print(f"\n[GazeboEnv] -> GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
 
         ros_path = os.path.dirname(subprocess.check_output(["which", "roscore"]))
-        #cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
+        cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
 
         # NOTE: It doesn't make sense to launch a roscore because it will be done when spawing Gazebo, which also need
         #   to be the first node in order to initialize the clock.
@@ -60,18 +70,22 @@ class GazeboEnv(gym.Env):
         if not os.path.exists(fullpath):
             raise IOError(f"[GazeboEnv] -> File {fullpath} does not exist")
 
+        ic("GAZEBO LAUNCHING")
         # launching GAZEBO
+        ic(fullpath)
         self._roslaunch = subprocess.Popen([
             sys.executable, os.path.join(ros_path, b"roslaunch"), "-p", self.port, fullpath
         ])
-        print("\n[GazeboEnv] -> Gazebo launched!")
+        ic(self._roslaunch)
+        #print("\n[GazeboEnv] -> Gazebo launched!")
+        ic("GAZEBO LAUNCHED")
 
         self.gzclient_pid = 0
 
         # Launch the simulation with the given launchfile name
         rospy.init_node('gym', anonymous=True)
 
-        #cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
+        cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
 
         ################################################################################################################
         # r = rospy.Rate(1)
@@ -122,7 +136,7 @@ class GazeboEnv(gym.Env):
 
     def _gazebo_reset(self):
         # Resets the state of the environment and returns an initial observation.
-        print(f"\n GazeboEnv._gazebo_reset()\n")
+        #print(f"\n GazeboEnv._gazebo_reset()\n")
         rospy.wait_for_service('/gazebo/reset_simulation')
         try:
             # reset_proxy.call()

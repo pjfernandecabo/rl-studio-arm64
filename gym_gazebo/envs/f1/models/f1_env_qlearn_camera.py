@@ -7,26 +7,39 @@ from gym import spaces
 from gym.utils import seeding
 from sensor_msgs.msg import Image
 
-from agents.f1.settings import telemetry, x_row, center_image, width, height, telemetry_mask, max_distance
+#from agents.f1.settings import telemetry, x_row, center_image, width, height, telemetry_mask, max_distance
+from settings import telemetry, x_row, center_image, width, height, telemetry_mask, max_distance
 from gym_gazebo.envs.f1.image_f1 import ImageF1
 from gym_gazebo.envs.f1.models.f1_env import F1Env
 
 from cprint import cprint
+from icecream import ic
+from datetime import datetime
 
+
+ic.enable()
+#ic.disable()
+#ic.configureOutput(prefix='Debug | ')
+ic.configureOutput(prefix=f'{datetime.now()} | ')
 
 class F1QlearnCameraEnv(F1Env):
 
     def __init__(self, **config):
 
-        #cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
-
+        cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
+        ic('Enter in F1QlearnCameraEnv')
         F1Env.__init__(self, **config)
         #print(f"\n [F1QlearnCameraEnv] -> config: {config}")
         self.image = ImageF1()
         self.actions = config.get("actions")
         self.action_space = spaces.Discrete(len(self.actions))  # actions  # spaces.Discrete(3)  # F,L,R
 
-        #cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
+        self.rewards = config["rewards"]
+        #ic(self.rewards)
+        #ic(self.rewards['from_done'])
+
+
+        cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
 
     def render(self, mode='human'):
         pass
@@ -149,22 +162,24 @@ class F1QlearnCameraEnv(F1Env):
             done = True
         if not done:
             if 0 <= center <= 0.2:
-                reward = 10
+                reward = self.rewards['from_0_02']
             elif 0.2 < center <= 0.4:
-                reward = 2
+                reward = self.rewards['from_02_04']
             else:
-                reward = 1
+                reward = self.rewards['from_others']
         else:
-            reward = -100
+            reward = self.rewards['from_done']
 
         if telemetry:
-            print(f"center: {center} - actions: {action} - reward: {reward}")
+            print(f"\n F1QlearnCameraEnv.step() -> center: {center}"
+            f" - actions: {action} - reward: {reward}")
             # self.show_telemetry(f1_image_camera.data, points, action, reward)
 
         return state, reward, done, {}
 
     def reset(self):
-        print(f"\n F1QlearnCameraEnv.reset()\n")
+        #print(f"\n F1QlearnCameraEnv.reset()\n")
+        ic("F1QlearnCameraEnv.reset()")
         # === POSE ===
         if self.alternate_pose:
             self._gazebo_set_new_pose

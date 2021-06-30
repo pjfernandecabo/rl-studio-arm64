@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import time
 import sys
 import argparse
@@ -8,6 +8,7 @@ from functools import reduce
 import gym
 import numpy as np
 import os
+from icecream import ic
 
 # next imports
 # from agents.f1.settings
@@ -19,10 +20,17 @@ import os
 import settings
 import liveplot
 import utils
-#import settings
 
 #from algorithms.qlearn import QLearn
-from agents.f1.train_qlearning_f1 import train_qlearning_f1
+from algorithms.Tabulars.train_qlearning import train_qlearning
+from algorithms.Tabulars.test_qlearning import test_qlearning
+from algorithms.Approximate.DQN.train_dqn import train_dqn
+
+
+ic.enable()
+#ic.disable()
+#ic.configureOutput(prefix='Debug | ')
+ic.configureOutput(prefix=f'{datetime.now()} | ')
 
 
 
@@ -36,21 +44,28 @@ if __name__ == '__main__':
     #config, algorithm1, algorithm_hyperparams1, model1, actions1, gaz_pos1 = utils.read_config(args.config_file)
     config = utils.read_config(args.config_file)
 
-    execute_algor = f"{config['Method']}_{config['Algorithm']}_{config['Agent']}"
-    print(f"\n [RLStudio] -> execute ALGORITHM : {execute_algor}")
+    execute_algor = f"{config['Method']}_{config['Algorithm']}"
+    #print(f"\n [RLStudio] -> execute ALGORITHM : {execute_algor}")
+    ic(execute_algor)
+
 
     # ------------------- CREATE DIRS
     os.makedirs("logs", exist_ok=True)
-    os.makedirs("stats", exist_ok=True)
+    #os.makedirs("stats", exist_ok=True)
     os.makedirs("images", exist_ok=True)
+    #os.makedirs("tables", exist_ok=True)
     #os.makedirs("logs", exist_ok=True)
     
 
 
-    if execute_algor == 'train_qlearning_f1':
-        train_qlearning_f1(config)
-        
+    if execute_algor == 'train_qlearning':
+        train_qlearning(config)
 
+    if execute_algor == 'test_qlearning':
+        test_qlearning(config)        
+        
+    if execute_algor == 'train_dqn':
+        train_dqn(config)    
 
 
 
