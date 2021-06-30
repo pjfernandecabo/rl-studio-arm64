@@ -36,7 +36,7 @@ class GazeboEnv(gym.Env):
     #def __init__(self, launchfile):
     def __init__(self, **config):
 
-        #cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
+        cprint.ok(f"\n -------- Enter in GazeboEnv -----------\n")
         self.launchfile = config.get("launch")
         #cprint.info(f"[GazeboEnv] -> launchfile: {self.launchfile}")
         self.agent = config.get("agent")
@@ -52,7 +52,7 @@ class GazeboEnv(gym.Env):
         #print(f"\n[GazeboEnv] -> GAZEBO_MASTER_URI = http://localhost:{self.port_gazebo}\n")
 
         ros_path = os.path.dirname(subprocess.check_output(["which", "roscore"]))
-        #cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
+        cprint.warn(f"\n[GazeboEnv] -> ros_path: {ros_path}")
 
         # NOTE: It doesn't make sense to launch a roscore because it will be done when spawing Gazebo, which also need
         #   to be the first node in order to initialize the clock.
@@ -72,10 +72,11 @@ class GazeboEnv(gym.Env):
 
         ic("GAZEBO LAUNCHING")
         # launching GAZEBO
+        ic(fullpath)
         self._roslaunch = subprocess.Popen([
             sys.executable, os.path.join(ros_path, b"roslaunch"), "-p", self.port, fullpath
         ])
-
+        ic(self._roslaunch)
         #print("\n[GazeboEnv] -> Gazebo launched!")
         ic("GAZEBO LAUNCHED")
 
@@ -84,7 +85,7 @@ class GazeboEnv(gym.Env):
         # Launch the simulation with the given launchfile name
         rospy.init_node('gym', anonymous=True)
 
-        #cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
+        cprint.ok(f"\n [GazeboEnv] -> -------- Out GazeboEnv (__init__) ----------------\n")
 
         ################################################################################################################
         # r = rospy.Rate(1)

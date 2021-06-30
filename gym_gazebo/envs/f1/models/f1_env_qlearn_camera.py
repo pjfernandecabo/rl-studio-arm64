@@ -26,7 +26,7 @@ class F1QlearnCameraEnv(F1Env):
 
     def __init__(self, **config):
 
-        #cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
+        cprint.warn(f"\n [F1QlearnCameraEnv] -> --------- Enter in F1QlearnCameraEnv ---------------\n")
         ic('Enter in F1QlearnCameraEnv')
         F1Env.__init__(self, **config)
         #print(f"\n [F1QlearnCameraEnv] -> config: {config}")
@@ -39,7 +39,7 @@ class F1QlearnCameraEnv(F1Env):
         #ic(self.rewards['from_done'])
 
 
-        #cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
+        cprint.ok(f"\n  [F1QlearnCameraEnv] -> ------------ Out F1QlearnCameraEnv (__init__) -----------\n")
 
     def render(self, mode='human'):
         pass

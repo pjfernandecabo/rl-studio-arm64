@@ -78,7 +78,7 @@ def save_tables_npy_rewards(outdir, qlearn, config, episode):
     os.makedirs(f"{outdir_tables}", exist_ok=True)
     #os.makedirs("Tables", exist_ok = True)
                 #np.save(f"Tables/{type(agent).__name__}-{LEARNING_RATE}-{DISCOUNT}-{episode}-qtable.npy", q_table)
-    np.save(f"{outdir_tables}/-{config['Method']}_{config['Algorithm']}_{config['Agent']}_{config['Model']}_EPISODE_{episode}_{time.strftime('%Y%m%d-%H%M%S')}-qtable.npy", qlearn.q)
+    np.save(f"{outdir_tables}/{config['Method']}_{config['Algorithm']}_{config['Agent']}_{config['Model']}_EPISODE_{episode}_{time.strftime('%Y%m%d-%H%M%S')}-qtable.npy", qlearn.q)
        
 
 def load_model(outdir, qlearn, file_name, config):
@@ -119,7 +119,7 @@ def save_model(outdir, qlearn, current_time, states, states_counter, states_rewa
     '''
     Q Table
     '''
-    base_file_name = "_actions_set_{}_epsilon_{}".format(settings.actions_set, round(qlearn.epsilon, 2))
+    base_file_name = "_actions_set:_{}_epsilon:_{}".format(settings.actions_set, round(qlearn.epsilon, 2))
     file_dump = open(f"{outdir_models}/1_" + current_time + base_file_name + '_QTABLE.pkl', 'wb')
     pickle.dump(qlearn.q, file_dump)
     

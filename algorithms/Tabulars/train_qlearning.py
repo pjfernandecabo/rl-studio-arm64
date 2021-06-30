@@ -62,7 +62,7 @@ def train_qlearning(config):
 
     #cprint.info(f"\n ---- [train_qlearning_f1] -> come back train_qlearn_f1 ------------")
 
-    # ---------------- Init hyperparmas & Algorithm
+    # ---------------- Init hyperparams & Algorithm
     alpha = config['Hyperparams']['alpha']
     gamma = config['Hyperparams']['gamma']
     initial_epsilon = config['Hyperparams']['epsilon']
@@ -72,8 +72,7 @@ def train_qlearning(config):
     estimated_steps = config['envs_params'][model]['estimated_steps']
 
     actions = range(env.action_space.n) # lo recibe de F1QlearnCameraEnv
-    qlearn = QLearn(actions=actions, alpha=alpha, gamma=gamma, epsilon=epsilon)    
-    
+    ic(actions)    
 
     # ---------------- Init vars 
     outdir = f"{config['Dirspace']}/logs/{config['Method']}_{config['Algorithm']}_{config['Agent']}"
@@ -120,9 +119,22 @@ def train_qlearning(config):
     #ic(start_time_format)
     #ic(previous)       
 
+    '''
+        LOAD qtable to continue training. So we start from not empty table
 
     '''
-        LOAD MODEL OR NOT
+    if config['load_qtable']:
+        q_table = config['table_loaded']
+        qlearn = QLearn(actions=actions, alpha=alpha, gamma=gamma, epsilon=epsilon, q_table=q_table)    
+
+    else:
+        qlearn = QLearn(actions=actions, alpha=alpha, gamma=gamma, epsilon=epsilon)    
+
+
+    '''
+        LOAD highest_reward, but then we dont use anymore.
+        LOAD MODEL OR NOT. WE HERITATE THIS ONE
+        BUT i NOT SURE IT WORKS PROPERLY
     '''
     if config['load_model']:
         file_name = config['file_load_pickle']
@@ -278,7 +290,7 @@ def train_qlearning(config):
         ep_rewards.append(cumulated_reward)
         #if highest_reward < cumulated_reward:
         #    highest_reward = cumulated_reward 
-        if not episode % config['save_episodes'] and config['save_model'] and episode > 1:
+        if not episode % config['save_episodes'] and config['save_model'] and episode >= 1:
             average_reward = sum(ep_rewards[-config['save_episodes']:]) / len(ep_rewards[-config['save_episodes']:])
 
             aggr_ep_rewards['episode'].append(episode)
@@ -289,7 +301,7 @@ def train_qlearning(config):
             aggr_ep_rewards['min'].append(min(ep_rewards[-config['save_episodes']:]))
             aggr_ep_rewards['time_training'].append(datetime.now()-start_time)
             
-            print(f"\tSAVING MODEL in time {datetime.now() - timedelta(hours=config['train_hours'])}\n")
+            print(f"\tSAVING MODEL in time {datetime.now() - timedelta(hours=config['Train_hours'])}\n")
             print(f"    - N epoch:     {episode}")
             print(f"    - Model size:  {len(qlearn.q)}")
             print(f"    - Action set:  {settings.actions_set}")

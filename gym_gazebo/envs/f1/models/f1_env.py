@@ -6,6 +6,10 @@ from gym import spaces
 from std_srvs.srv import Empty
 
 from gym_gazebo.envs import gazebo_env
+from gym_gazebo.envs.f1.env_type import TrainingType
+from gym_gazebo.envs.f1.exceptions import NoValidTrainingType
+
+
 from cprint import cprint
 
 
@@ -13,7 +17,7 @@ class F1Env(gazebo_env.GazeboEnv):
 
     def __init__(self, **config):
 
-        #cprint.warn(f"\n [F1Env] -> --------- Enter in F1Env ------- \n")
+        cprint.warn(f"\n [F1Env] -> --------- Enter in F1Env ------- \n")
 
         # Launch GazeboEnv
         #gazebo_env.GazeboEnv.__init__(self, config.get("launch"))
@@ -39,7 +43,7 @@ class F1Env(gazebo_env.GazeboEnv):
         self.start_pose = np.array(config.get("start_pose"))
         self._seed()
 
-        #cprint.ok(f"\n  [F1Env] -> -------Out F1Env (__init__) ------------\n")
+        cprint.ok(f"\n  [F1Env] -> -------Out F1Env (__init__) ------------\n")
 
 
     def render(self, mode='human'):

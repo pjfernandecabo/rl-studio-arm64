@@ -7,13 +7,13 @@
 Dirspace: /home/parallels/rl-studio-arm64
 
 # Options: qlearning
-Algorithm: qlearning
+Algorithm: dqn
 
 # Options: f1
 Agent: f1
 
 # Options: train, test
-Method: test
+Method: train
 
 ##### For test
 num_test: 20
@@ -29,6 +29,18 @@ Hyperparams:
   #highest_reward: 0
   total_episodes: 2
 
+
+# Neural Net DQN settings
+replay_memory_size: 50_000 # How many last steps to keep for model training
+min_replay_memory_size: 1_000 # Minimum number of steps in a memory to start training
+minibatch_size: 64 # How many steps (samples) to use for training
+update_target_every: 5 # Terminal states (end of episodes)
+model_name: '2x256'
+memory_fraction: 0.20
+height_image: 640
+width_image: 480
+
+
 # Options: simple, nurburgring, montreal, curves, manual
 Model: simple
 
@@ -36,7 +48,7 @@ Model: simple
 envs_params:
   simple:
     env: F1Env-v0
-    training_type: qlearn_camera
+    training_type: dqn_camera
     circuit_name: simple
     #actions: available_actions_simple  # Change 
     launch: simple_circuit.launch
