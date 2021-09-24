@@ -26,7 +26,8 @@ class ModifiedTensorBoard(TensorBoard):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.step = 1
-        self.writer = tf.summary.FileWriter(self.log_dir)
+        #self.writer = tf.summary.FileWriter(self.log_dir)
+        self.writer = tf.summary.create_file_writer(self.log_dir)
 
     # Overriding this method to stop creating default log writer
     def set_model(self, model):
@@ -46,11 +47,29 @@ class ModifiedTensorBoard(TensorBoard):
     def on_train_end(self, _):
         pass
 
+    def _write_logs(self, logs, index):
+        with self.writer.as_default():
+            for name, value in logs.items():
+                tf.summary.scalar(name, value, step=index)
+                self.step += 1
+                self.writer.flush()
+
     # Custom method for saving own metrics
     # Creates writer, writes custom metrics and closes writer
     def update_stats(self, **stats):
         self._write_logs(stats, self.step)
 
+
+    #def _write_logs(self, logs, index):
+    #    for name, value in logs.items():
+    #        if name in ['batch', 'size']:
+    #            continue
+    #        summary = tf.Summary()
+    #        summary_value = summary.value.add()
+    #        summary_value.simple_value = value
+    #        summary_value.tag = name
+    #        self.writer.add_summary(summary, index)
+    #    self.writer.flush()
 
 class DQNAgent:
     def __init__(self, config, action_space_size, observation_space_values, outdir):
@@ -78,7 +97,7 @@ class DQNAgent:
         self.replay_memory = deque(maxlen=self.REPLAY_MEMORY_SIZE)
 
         # Custom tensorboard object
-        self.tensorboard = ModifiedTensorBoard(log_dir=f"{outdir}/logs_TensorBoard/{self.MODEL_NAME}-{int(time.time())}")
+        self.tensorboard = ModifiedTensorBoard(log_dir=f"{outdir}/logs_TensorBoard/{self.MODEL_NAME}-{time.strftime('%Y%m%d-%H%M%S')}")
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -129,7 +148,7 @@ class DQNAgent:
         model.add(Dense(self.ACTION_SPACE_SIZE, activation="linear"))
         #model.add(Dense(9, activation="linear"))
 
-        model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
+        model.compile(loss="mse", optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
         return model
 
     def update_replay_memory(self, transition):

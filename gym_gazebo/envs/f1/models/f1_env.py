@@ -17,7 +17,7 @@ class F1Env(gazebo_env.GazeboEnv):
 
     def __init__(self, **config):
 
-        cprint.warn(f"\n [F1Env] -> --------- Enter in F1Env ------- \n")
+        #cprint.warn(f"\n [F1Env] -> --------- Enter in F1Env ------- \n")
 
         # Launch GazeboEnv
         #gazebo_env.GazeboEnv.__init__(self, config.get("launch"))
@@ -41,9 +41,12 @@ class F1Env(gazebo_env.GazeboEnv):
         self.model_coordinates = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
         self.position = None
         self.start_pose = np.array(config.get("start_pose"))
+        self.start_random_pose = config.get("gaz_pos")
+        #print(f"self.start_random_pose: {self.start_random_pose}")
+        #self.image = rospy.ServiceProxy('/F1ROS/cameraL/image_raw', Image, timeout=5)
         self._seed()
 
-        cprint.ok(f"\n  [F1Env] -> -------Out F1Env (__init__) ------------\n")
+        #cprint.ok(f"\n  [F1Env] -> ------- Out F1Env (__init__) ------------\n")
 
 
     def render(self, mode='human'):

@@ -18,13 +18,14 @@ from icecream import ic
 
 # Importing app local files
 import settings
-import liveplot
+#import liveplot
 import utils
 
 #from algorithms.qlearn import QLearn
 from algorithms.Tabulars.train_qlearning import train_qlearning
 from algorithms.Tabulars.test_qlearning import test_qlearning
 from algorithms.Approximate.DQN.train_dqn import train_dqn
+from algorithms.Approximate.DQN.train_dqn_V1 import train_dqn_V1
 
 
 ic.enable()
@@ -64,8 +65,11 @@ if __name__ == '__main__':
     if execute_algor == 'test_qlearning':
         test_qlearning(config)        
         
+    if execute_algor == 'train_dqn_V1':
+        train_dqn_V1(config)   
+
     if execute_algor == 'train_dqn':
-        train_dqn(config)    
+        train_dqn(config)          
 
 
 

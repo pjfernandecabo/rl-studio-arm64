@@ -29,6 +29,7 @@ def train_dqn(config):
     model = config['Model']
 
     # ------------------ Init env
+
     environment = {}
     environment['agent'] = config['Agent']
     environment['env'] = config['envs_params'][model]['env']
@@ -44,6 +45,7 @@ def train_dqn(config):
     environment['rewards'] = config['Rewards']
     environment['ROS_MASTER_URI'] = config['ROS_MASTER_URI']
     environment['GAZEBO_MASTER_URI'] = config['GAZEBO_MASTER_URI']
+    environment['telemetry'] = config['telemetry']
 
 
     #print(f"\n [train_qlearning_f1] -> environment: {environment}")
@@ -89,7 +91,7 @@ def train_dqn(config):
         START DQN Agent
     '''
     agent_dqn = DQNAgent(config, action_space_size, observation_space_values, outdir)
-
+    #ic(agent_dqn)
 
 
     '''
@@ -117,18 +119,18 @@ def train_dqn(config):
     #plotter = liveplot.LivePlot(outdir)
     
     counter = 0
-    estimate_step_per_lap = environment["estimated_steps"]
-    lap_completed = config['lap_completed']
+    #estimate_step_per_lap = environment["estimated_steps"]
+    #lap_completed = config['lap_completed']
 
     '''
         TIME
     '''
     start_time_training = time.time()
-    telemetry_start_time = time.time()
+    #telemetry_start_time = time.time()
     start_time = datetime.now()
-    start_time_format = start_time.strftime("%Y%m%d_%H%M")
-    previous = datetime.now()
-    checkpoints = []  # "ID" - x, y - time 
+    #start_time_format = start_time.strftime("%Y%m%d_%H%M")
+    #previous = datetime.now()
+    #checkpoints = []  # "ID" - x, y - time 
 
     #cprint.warn(f"\n[train_qlearning_f1] -> {config['Lets_go']}")
     ic(config['Lets_go'])
@@ -141,31 +143,229 @@ def train_dqn(config):
     '''
 
     #start_time_training = time.time()
-    for episode in tqdm(range(total_episodes), ascii=True, unit='episodes'):
+    for episode in tqdm(range(total_episodes + 1), ascii=True, unit='episodes'):
 
+        '''
+        Update TensorBoard in every episode
+        '''
         agent_dqn.tensorboard.step = episode
-        counter = 0
+
+        #counter = 0
         done = False
-        lap_completed = False
+        #lap_completed = False
         cumulated_reward = 0
+        step = 1
 
         observation = env.reset()
 
         if epsilon > 0.05:
             epsilon *= epsilon_discount
 
-        state = ''.join(map(str, observation))
+        #state = ''.join(map(str, observation))
         #print(f"\n -> START episode {episode}, counter: {counter}, observation: {observation}"
         #    f", done: {done}, lap_completed: {lap_completed}, cumulated_reward: {cumulated_reward}"
         #    f". state: {state}")
 
-        ic('START EPISODE')
-        ic(episode)    
-        ic(counter)    
-        ic(observation)    
-        ic(lap_completed)    
-        ic(cumulated_reward)    
-        ic(done)    
-        ic(state)  
+        #ic('START EPISODE')
+        #ic(episode)    
+        #ic(counter)    
+        #ic(observation)    
+        #ic(lap_completed)    
+        #ic(cumulated_reward)    
+        #ic(done)    
+        #ic(state)  
 
+        '''
+            START STEPS in every episode
+        '''
+
+        '''
+        Finish every Episode for 3 reasons:
+            1. Done by env
+            2. Reached estimated_steps for every circuit
+            3. Training time ended: 2 hours or 2 days...in convenience
+        
+        '''
+        #for step in tqdm(range(estimated_steps)): #original range(500_000)
+        #while not done or (step < estimated_steps) or (datetime.now() - timedelta(hours=config['Train_hours']) < start_time):
+        
+        '''
+        class datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+        '''
+        while not done and (step < estimated_steps) and (datetime.now() - timedelta(hours=config['training_time']) < start_time):
+            #counter += 1
+
+            if np.random.random() > epsilon:
+                # Get action from Q table
+                #action = np.argmax(agent_dqn.get_qs(state))
+                action = np.argmax(agent_dqn.get_qs(observation))
+            else:
+                # Get random action
+                action = np.random.randint(0, action_space_size)
+
+            #ic(action)
+
+            new_observation, reward, done, info = env.step(action)
+            #print(f"\n ==> episode {episode}, step {step}: action: {action}"
+            #    f", observation: {observation}, reward: {reward}"
+            #    f", done: {done}, info: {info}")
+            #ic('init step')
+            #ic(episode)    
+            #ic(step)    
+            #ic(estimated_steps)    
+            #ic(action)    
+            #ic(new_observation)    
+            #ic(reward)    
+            #ic(done)    
+            #ic(info)    
+            
+            cumulated_reward += reward
+
+            #if highest_reward < cumulated_reward:
+            #    highest_reward = cumulated_reward
+
+            #nextState = ''.join(map(str, observation))
+
+            '''
+            try:
+                states_counter[nextState] += 1
+            except KeyError:
+                states_counter[nextState] = 1
+            '''
+
+            # Every step we update replay memory and train main network
+            #agent_dqn.update_replay_memory((state, action, reward, nextState, done))
+            agent_dqn.update_replay_memory((observation, action, reward, new_observation, done))
+            agent_dqn.train(done, step)
+
+            observation = new_observation 
+            step += 1
+
+            
+            '''
+            Show information 'save_every_step'
+
+            '''
+
+            
+            # SAVING every XX steps and XX time 
+            #if counter >= config['save_every_step']: #original 1000
+            if not step % config['save_every_step'] and config['save_model']:
+                #epsilon *= epsilon_discount
+                # utils.save_model(outdir, qlearn, start_time_format, episode, states_counter, states_reward)
+                #print(f"\tSAVING MODEL in step {step} in episode {episode}--------> \n")
+                #print(f"    - N epoch:     {episode}")
+                #print(f"    - Model size:  {len(qlearn.q)}")
+                #print(f"    - Action set:  {settings.actions_set}")
+                #print(f"    - Epsilon:     {epsilon}")
+                #print(f"    - Cum. reward: {cumulated_reward}")      
+                #print(f"    - steps: {step}")      
+                #print(f"    - time: {datetime.now()-start_time}\n\t")   
+                #ic("------> SAVING model in \"save_every_step\":")
+                ic(episode)    
+                ic(step)    
+                ic(epsilon)
+                #ic(counter)    
+                #ic(action)    
+                #ic(new_observation)    
+                ic(cumulated_reward)    
+                ic(done)    
+                ic(info) 
+
+
+
+            # Aqui voy a poner una salida de STEPS
+            # si cumulated_reward = XXXX OR steps = 50_000 OR tiempo de ejecucion > limite_temporal OR ...:
+            #   break
+            #if step > estimated_steps or :
+            #    done = True
+                
+            
+
+
+        # WE SAVE BEST VALUES IN EVERY EPISODE
+        ep_rewards.append(cumulated_reward)
+        #if highest_reward < cumulated_reward:
+        #    highest_reward = cumulated_reward 
+        if not episode % config['save_episodes'] and config['save_model'] and episode >= 1:
+            average_reward = sum(ep_rewards[-config['save_episodes']:]) / len(ep_rewards[-config['save_episodes']:])
+            min_reward = min(ep_rewards[-config["save_episodes"]:])
+            max_reward = max(ep_rewards[-config["save_episodes"]:])
+
+            agent_dqn.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=epsilon)
+
+            if average_reward >= config['envs_params'][model]['min_reward']:
+                agent_dqn.model.save(f'models/{config["model_name"]}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
+
+            aggr_ep_rewards['episode'].append(episode)
+            aggr_ep_rewards['step'].append(step)
+            aggr_ep_rewards['epsilon'].append(epsilon)
+            aggr_ep_rewards['avg'].append(average_reward)
+            aggr_ep_rewards['max'].append(max(ep_rewards[-config['save_episodes']:]))
+            aggr_ep_rewards['min'].append(min(ep_rewards[-config['save_episodes']:]))
+            aggr_ep_rewards['time_training'].append(datetime.now()-start_time)
+            
+
+            
+            #print(f"\t-----> SAVING MODEL in time {datetime.now() - timedelta(hours=config['Train_hours'])}\n")
+            #print(f"    - N epoch:     {episode}")
+            #print(f"    - Model size:  {len(qlearn.q)}")
+            #print(f"    - Action set:  {settings.actions_set}")
+            #print(f"    - Epsilon:     {epsilon}")
+            #print(f"    - Cum. reward: {cumulated_reward}")
+            #print(f"    - steps: {step}")      
+            #print(f"    - time: {datetime.now()-start_time}\n\t") 
+
+            ic("---------> SAVING EPISODE:")
+            ic(episode)    
+            ic(step)    
+            ic(epsilon)
+            #ic(counter)    
+            #ic(action)    
+            #ic(new_observation)    
+            ic(cumulated_reward)    
+            ic(done)    
+            ic(info)
+
+
+    # End Training EPISODES
+
+    env.close()
+
+
+    '''
+       ################################ BEGIN STATS ZONE
+    '''
+    end_time_training = time.time()
+    training_time = end_time_training - start_time_training
+    #print(f"\n ========= FINISH TRAINING at episode {episode} in time: {datetime.now()-start_time} ========\n\t")
+    ic("========= FINISH TRAINING =========")
+    ic(episode)
+    ic(total_episodes)
+
+    #ic("in time:")
+    ic(datetime.now()-start_time)
+    ic(start_time_training)
+    ic(end_time_training)
+    ic(training_time)
+    #print(f"Start Time: {start_time_training}, end time: {end_time_training}, and exec time: {training_time} in seconds")
+
+    #print(f"Total Episodes: {total_episodes} - initial epsilon: {initial_epsilon} "
+    #        f"- epsilon discount: {epsilon_discount} - Highest Reward: {highest_reward}")
+
+    #ic(initial_epsilon)
+    #ic(epsilon_discount)
+    #ic(highest_reward)
+
+    # print("Parameters: a="+str)
+
+    if done:
+        print(f" ----- OVERALL STATS")
+        #print("Overall score: {:0.2f}".format(last_time_steps.mean()))
+    
+        #l = last_time_steps.tolist()
+        #l.sort()
+        #print("Best 100 scores: {:0.2f}".format(reduce(lambda x, y: x + y, l[-100:]) / len(l[-100:])))
+
+        #plotter.plot_steps_vs_epoch(stats, save=True)
 

@@ -4,7 +4,7 @@
 # - Gazebo
 # - Camera
 
-Dirspace: /home/parallels/rl-studio-arm64
+Dirspace: /home/docker/rl-studio-arm64 #/home/docker/rl-studio-arm64
 
 # Options: qlearning
 Algorithm: dqn
@@ -27,7 +27,7 @@ Hyperparams:
   epsilon: 0.99
   epsilon_discount: 0.9986
   #highest_reward: 0
-  total_episodes: 2
+  total_episodes: 10
 
 
 # Neural Net DQN settings
@@ -54,8 +54,8 @@ envs_params:
     launch: simple_circuit.launch
     #gaz_pos: gazebo_positions_simple  # Change
     #start_pose: gazebo_positions_simple
-    alternate_pose: False
-    estimated_steps: 100 #original 4000
+    alternate_pose: True
+    estimated_steps: 2000 #original 4000
     sensor: camera
 
 # rewards
